@@ -22,7 +22,7 @@ class ProductFactory extends Factory
             'nombre'=>fake()->sentence(2),
             'descripcion'=>fake()->text(),
             'imagen'=>"images/products".fake()->picsum('public/storage/images/products', 640, 480, false),
-            'stock'=>fake()->randomNumber(300),
+            'stock'=>fake()->randomNumber(),
             'category_id'=>Category::all()->random()->id
         ];
     }

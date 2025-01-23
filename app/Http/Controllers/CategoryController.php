@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,7 +13,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::orderBy('nombre')->get();
+        return view('categorias.index', compact('categories'));
     }
 
     /**
@@ -20,7 +22,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('categorias.create');
     }
 
     /**
@@ -28,7 +30,9 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate($this->rules());
+        Category::create($request->all());
+        return redirect()->route('categories.index')->with('message', 'Categoria creada con exito');
     }
 
     /**
@@ -61,5 +65,13 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         //
+    }
+
+    private function rules(?int $id = null){
+        return [
+            'nombre'=>['required', 'string', 'max:30', 'min:3', 'unique:categories,nombre,'.$id],
+            'color'=>['required', 'color-hex']
+        ];
+
     }
 }
