@@ -43,7 +43,16 @@
                     {{$item->color}}
                 </td>
                 <td class="px-6 py-4">
-                    
+                    <form action="{{route('categories.destroy', $item)}}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <a href="{{route('categories.edit', $item)}}">
+                            <i class="fas fa-edit text-blue-500"></i>
+                        </a>
+                        <button type="submit">
+                            <i class="fas fa-trash text-red-500"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
             @endforeach
@@ -51,4 +60,8 @@
     </table>
 </div>
    
+@endsection
+
+@section('alertas')
+<x-alertas/>
 @endsection

@@ -48,7 +48,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        return view('categorias.edit', compact('category'));
     }
 
     /**
@@ -56,7 +56,9 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        $request->validate($this->rules());
+        $category->update($request->all());
+        return redirect()->route('categories.index')->with('message', 'Categoria adeitada con exito');
     }
 
     /**
@@ -64,7 +66,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return redirect()->route('categories.index')->with('message', 'Categoria borrada con exito');
     }
 
     private function rules(?int $id = null){

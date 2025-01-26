@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -12,7 +14,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $products = Product::orderBy('nombre', 'desc')->paginate(10);
+        return view('productos.index', compact('products'));
     }
 
     /**
@@ -20,7 +23,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $categorias = Category::orderBy('nombre')->get();
+
+        return view('productos.create', compact('categorias'));
     }
 
     /**
@@ -28,7 +33,10 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $datos = $request->validate($this->rules());
+        $datos['imagen'] = ($request->imagen) ? $request->imagen->store('images/products/') : 'images/products/noimage.png';
+        Product::create($datos);
+        return redirect()->route('products.index')->with('message', "Producto creado");
     }
 
     /**
@@ -44,7 +52,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        $categorias = Category::orderBy('nombre')->get();
+        return view('productos.edit', compact('product', 'categorias'));
     }
 
     /**
@@ -52,7 +61,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $datos = $request->validate($this->rules($product->id));
+        $datos['imagen'] = ($request->imagen) ? $request->imagen->store('images/products/') : $product->imagen;
+        $imagenVieja = $product->imagen;
+        $product->update($datos);
+        if (basename($imagenVieja) != 'noimage.png' && $request->imagen) {
+            Storage::delete($imagenVieja);
+        }
+        return redirect()->route('products.index')->with('message', "Producto Editado");
     }
 
     /**
@@ -60,6 +76,21 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        if (basename($product->imagen) != 'noimage.jpeg') {
+            Storage::delete($product->imagen);
+        }
+
+        $product->delete();
+        return redirect()->route('products.index')->with('message', 'El producto ha sido eliminado');
+    }
+
+    private function rules(?int $id = null):array {
+        return [
+            'nombre' => ['required', 'string', 'min:3', 'max:50', 'unique:products,nombre,'.$id],
+            'descripcion' => ['required', 'string', 'min:10', 'max:150'],
+            'stock' => ['required'],
+            'imagen' => ['image', 'max:2048'],
+            'category_id' => ['required', 'exists:categories,id'],
+        ];
     }
 }
